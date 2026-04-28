@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dossier Architecture — Projet Avis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #5b8dee;
+    --accent2: #e85d8a;
+    --accent3: #3ecf8e;
+    --accent4: #f5a623;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --code-bg: #0a0c10;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,15,20,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 0; overflow-x: auto;
+  }
+  nav a {
+    padding: 1rem 1.5rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+  }
+  nav a:hover, nav a.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #1a2240 0%, transparent 70%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-tag {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    padding: .3rem 1rem;
+    font-size: .75rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); max-width: 600px; margin: 0 auto; }
+
+  /* SECTIONS */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: .7rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    margin-bottom: 2rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: .75rem;
+    margin-top: 2rem;
+  }
+  p { color: #a8b0c0; margin-bottom: 1rem; }
+
+  /* SOLID GRID */
+  .solid-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  .solid-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .solid-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .solid-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .solid-letter {
+    width: 3rem; height: 3rem;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .solid-header h3 { margin: 0; font-size: 1rem; }
+  .solid-header p { margin: 0; font-size: .8rem; color: var(--muted); }
+  .solid-body { padding: 1.25rem 1.5rem; }
+  .solid-body > p { font-size: .9rem; margin-bottom: 1rem; }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    line-height: 1.6;
+  }
+  .kw { color: #c792ea; }
+  .cls { color: #82aaff; }
+  .fn { color: #82cfff; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .an { color: #f78c6c; }
+  .num { color: #f78c6c; }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: 4px;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+  }
+  .badge-ok { background: rgba(62,207,142,.15); color: var(--accent3); border: 1px solid rgba(62,207,142,.3); }
+
+  /* STATE DIAGRAM */
+  .state-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .state-row { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+  .state-box {
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: .9rem;
+    min-width: 130px;
+    border: 2px solid;
+  }
+  .state-init { border-color: #5b8dee; background: rgba(91,141,238,.12); color: #5b8dee; }
+  .state-wait { border-color: var(--accent4); background: rgba(245,166,35,.1); color: var(--accent4); }
+  .state-valid { border-color: var(--accent3); background: rgba(62,207,142,.1); color: var(--accent3); }
+  .state-reject { border-color: var(--accent2); background: rgba(232,93,138,.1); color: var(--accent2); }
+  .state-start {
+    width: 20px; height: 20px;
+    background: var(--text);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .state-end {
+    width: 20px; height: 20px;
+    background: transparent;
+    border: 3px solid var(--text);
+    border-radius: 50%;
+    position: relative; flex-shrink: 0;
+  }
+  .state-end::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 10px; height: 10px;
+    background: var(--text);
+    border-radius: 50%;
+  }
+  .arrow-down {
+    display: flex; flex-direction: column; align-items: center;
+    color: var(--muted); font-size: .75rem; font-weight: 600;
+    gap: .25rem; padding: .5rem 0;
+  }
+  .arrow-down::before { content: '│'; font-size: 1.2rem; line-height: 1; }
+  .arrow-down::after { content: '▼'; }
+  .arrow-label { color: var(--accent); background: rgba(91,141,238,.1); padding: .15rem .5rem; border-radius: 4px; font-size: .72rem; }
+
+  .branch-container {
+    display: flex; gap: 4rem; align-items: flex-start; margin: 1rem 0;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .branch { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .branch-label {
+    font-size: .75rem; font-weight: 700;
+    padding: .2rem .7rem;
+    border-radius: 4px;
+    margin-bottom: .5rem;
+  }
+  .branch-valider { background: rgba(62,207,142,.15); color: var(--accent3); }
+  .branch-rejeter { background: rgba(232,93,138,.15); color: var(--accent2); }
+  .arrow-side {
+    font-size: .8rem; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .arrow-side::before { content: '│'; }
+  .arrow-side::after { content: '▼'; }
+
+  /* SEQUENCE DIAGRAM */
+  .seq-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    overflow-x: auto;
+  }
+  .seq-actors {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+  }
+  .seq-actor {
+    flex: 1;
+    text-align: center;
+    min-width: 110px;
+  }
+  .seq-actor-box {
+    display: inline-block;
+    padding: .5rem .75rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: .75rem;
+    font-weight: 700;
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+  .seq-lifelines {
+    display: flex;
+    position: relative;
+    min-height: 480px;
+  }
+  .seq-lifeline {
+    flex: 1;
+    min-width: 110px;
+    border-left: 1.5px dashed var(--border);
+    position: relative;
+  }
+  .seq-lifeline:first-child { border-left: none; }
+  .seq-messages { position: absolute; top: 0; left: 0; right: 0; width: 100%; }
+  .seq-msg {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+  }
+  .msg-arrow {
+    height: 2px;
+    background: var(--accent);
+    position: relative;
+    flex: 1;
+  }
+  .msg-arrow::after {
+    content: '▶';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .6rem;
+    color: var(--accent);
+  }
+  .msg-arrow.return {
+    background: var(--muted);
+    border-top: 1.5px dashed var(--muted);
+    background: transparent;
+  }
+  .msg-arrow.return::after { color: var(--muted); }
+  .msg-label {
+    position: absolute;
+    top: -1.3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: .68rem;
+    white-space: nowrap;
+    color: var(--text);
+    background: var(--surface);
+    padding: .1rem .4rem;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* SVG SEQUENCE */
+  .seq-svg-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+  svg text { font-family: 'JetBrains Mono', monospace; }
+
+  /* ARCH LAYERS */
+  .arch-layers {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+  .arch-layer {
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .arch-layer-name {
+    font-weight: 800;
+    font-size: .85rem;
+    min-width: 180px;
+  }
+  .arch-layer-items {
+    display: flex; flex-wrap: wrap; gap: .4rem;
+  }
+  .arch-item {
+    font-size: .72rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: .2rem .5rem;
+    border-radius: 4px;
+    opacity: .85;
+  }
+
+  .layer-fw { border-color: #3a4060; background: rgba(30,35,60,.4); }
+  .layer-fw .arch-layer-name { color: #7090d0; }
+  .layer-fw .arch-item { background: rgba(70,90,160,.2); color: #8aabf0; }
+
+  .layer-adapter { border-color: #3a5040; background: rgba(30,50,35,.4); }
+  .layer-adapter .arch-layer-name { color: #60b080; }
+  .layer-adapter .arch-item { background: rgba(60,120,70,.2); color: #80d0a0; }
+
+  .layer-uc { border-color: #50403a; background: rgba(50,35,30,.4); }
+  .layer-uc .arch-layer-name { color: var(--accent4); }
+  .layer-uc .arch-item { background: rgba(120,80,30,.2); color: #f0b060; }
+
+  .layer-domain { border-color: #3a3050; background: rgba(30,25,50,.4); }
+  .layer-domain .arch-layer-name { color: #9080e0; }
+  .layer-domain .arch-item { background: rgba(90,70,180,.2); color: #b0a0f0; }
+
+  .arch-arrow { text-align: center; color: var(--muted); font-size: .8rem; padding: .1rem; }
+
+  /* PRINCIPLE BOX */
+  .principle-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: .88rem;
+    color: #a8b0c0;
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#architecture" class="active">Architecture</a>
+  <a href="#solid">Principes SOLID</a>
+  <a href="#etat-transition">État-Transition</a>
+  <a href="#sequence">Séquence</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">M2 — Software Architecture</div>
+  <h1>Projet <span>Avis</span><br>sur les jeux vidéo</h1>
+  <p>Dossier architectural — Clean Architecture · Principes SOLID · Diagrammes UML</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-label">01 — Vue d'ensemble</div>
+  <h2>Architecture logicielle</h2>
+
+  <p>Le projet adopte la <strong>Clean Architecture</strong> d'Uncle Bob : les couches internes (domaine, use cases) ne dépendent jamais des couches externes (framework, base de données). La règle de dépendance va toujours vers l'intérieur.</p>
+
+  <div class="arch-layers">
+    <div class="arch-layer layer-fw">
+      <div class="arch-layer-name">🔧 Frameworks &amp; Drivers</div>
+      <div class="arch-layer-items">
+        <span class="arch-item">Spring Boot</span>
+        <span class="arch-item">H2 Database</span>
+        <span class="arch-item">Hibernate / JPA</span>
+        <span class="arch-item">Swagger / OpenAPI</span>
+        <span class="arch-item">JUnit 5 + Mockito</span>
+      </div>
+    </div>
+    <div class="arch-arrow">↓ dépend de</div>
+    <div class="arch-layer layer-adapter">
+      <div class="arch-layer-name">🔌 Interface Adapters</div>
+      <div class="arch-layer-items">
+        <span class="arch-item">JeuController</span>
+        <span class="arch-item">AvisController</span>
+        <span class="arch-item">JoueurController</span>
+        <span class="arch-item">JeuPersistenceAdapter</span>
+        <span class="arch-item">AvisPersistenceAdapter</span>
+        <span class="arch-item">JoueurPersistenceAdapter</span>
+        <span class="arch-item">*PersistenceMapper</span>
+        <span class="arch-item">GlobalExceptionHandler</span>
+      </div>
+    </div>
+    <div class="arch-arrow">↓ dépend de</div>
+    <div class="arch-layer layer-uc">
+      <div class="arch-layer-name">⚙️ Use Cases</div>
+      <div class="arch-layer-items">
+        <span class="arch-item">AjouterJeu</span>
+        <span class="arch-item">ListerJeux</span>
+        <span class="arch-item">RedigerAvis</span>
+        <span class="arch-item">ModererAvis</span>
+        <span class="arch-item">ListerAvis</span>
+        <span class="arch-item">CreerJoueur</span>
+        <span class="arch-item">ListerJoueurs</span>
+        <span class="arch-item">BeanConfiguration</span>
+      </div>
+    </div>
+    <div class="arch-arrow">↓ dépend de</div>
+    <div class="arch-layer layer-domain">
+      <div class="arch-layer-name">🏛️ Entités Domaine</div>
+      <div class="arch-layer-items">
+        <span class="arch-item">Avis</span>
+        <span class="arch-item">Jeu</span>
+        <span class="arch-item">Joueur</span>
+        <span class="arch-item">Utilisateur</span>
+        <span class="arch-item">StatutAvis</span>
+        <span class="arch-item">JeuRepository (port)</span>
+        <span class="arch-item">AvisRepository (port)</span>
+        <span class="arch-item">JoueurRepository (port)</span>
+        <span class="arch-item">EntityNotFoundException</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="principle-box" style="margin-top:2rem">
+    💡 <strong>Clé de l'architecture :</strong> Le domaine ne contient aucun import Spring. Les repositories sont des interfaces dans le domaine (ports) et leurs implémentations vivent dans la couche adapter (adapters). La <code>BeanConfiguration</code> instancie les use cases manuellement, évitant que Spring pénètre dans le domaine.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SOLID -->
+<section id="solid">
+  <div class="section-label">02 — Principes</div>
+  <h2>Principes SOLID</h2>
+  <p>Chaque principe est illustré avec du code réel issu du projet.</p>
+
+  <div class="solid-grid">
+
+    <!-- S -->
+    <div class="solid-card">
+      <div class="solid-header">
+        <div class="solid-letter" style="background:rgba(91,141,238,.15);color:#5b8dee">S</div>
+        <div>
+          <h3>Single Responsibility</h3>
+          <p>Une classe = une seule raison de changer</p>
+        </div>
+      </div>
+      <div class="solid-body">
+        <p>Chaque use case gère une seule responsabilité. <code>RedigerAvisImpl</code> ne fait que créer un avis. <code>ModererAvisImpl</code> ne fait que modérer.</p>
+        <pre><span class="cm">// ✅ Responsabilité unique : rédiger un avis</span>
+<span class="kw">public class</span> <span class="cls">RedigerAvisImpl</span> <span class="kw">implements</span> <span class="cls">RedigerAvis</span> {
+
+    <span class="kw">private final</span> <span class="cls">AvisRepository</span> avisRepository;
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">executer</span>(<span class="cls">Avis</span> avis) {
+        <span class="cm">// Uniquement : initialiser et sauvegarder</span>
+        avis.<span class="fn">setStatut</span>(StatutAvis.EN_ATTENTE);
+        avis.<span class="fn">setDateDenvoi</span>(LocalDateTime.<span class="fn">now</span>());
+        avisRepository.<span class="fn">sauvegarder</span>(avis);
+    }
+}
+
+<span class="cm">// ✅ Autre responsabilité : modérer un avis</span>
+<span class="kw">public class</span> <span class="cls">ModererAvisImpl</span> <span class="kw">implements</span> <span class="cls">ModererAvis</span> {
+    <span class="kw">public void</span> <span class="fn">validerAvis</span>(<span class="cls">Long</span> id) { <span class="cm">/* ... */</span> }
+    <span class="kw">public void</span> <span class="fn">rejeterAvis</span>(<span class="cls">Long</span> id) { <span class="cm">/* ... */</span> }
+}</pre>
+        <span class="badge badge-ok">✓ Respecté</span>
+      </div>
+    </div>
+
+    <!-- O -->
+    <div class="solid-card">
+      <div class="solid-header">
+        <div class="solid-letter" style="background:rgba(232,93,138,.15);color:#e85d8a">O</div>
+        <div>
+          <h3>Open/Closed</h3>
+          <p>Ouvert à l'extension, fermé à la modification</p>
+        </div>
+      </div>
+      <div class="solid-body">
+        <p>Les use cases sont des interfaces. Ajouter un nouveau comportement = créer une nouvelle implémentation sans toucher à l'existant.</p>
+        <pre><span class="cm">// Interface fermée à la modification</span>
+<span class="kw">public interface</span> <span class="cls">AjouterJeu</span> {
+    <span class="kw">void</span> <span class="fn">executer</span>(<span class="cls">Jeu</span> jeu);
+}
+
+<span class="cm">// Implémentation actuelle</span>
+<span class="kw">public class</span> <span class="cls">AjouterJeuImpl</span> <span class="kw">implements</span> <span class="cls">AjouterJeu</span> {
+    <span class="kw">public void</span> <span class="fn">executer</span>(<span class="cls">Jeu</span> jeu) {
+        jeuRepository.<span class="fn">sauvegarder</span>(jeu);
+    }
+}
+
+<span class="cm">// Extension future possible : validation, notification</span>
+<span class="kw">public class</span> <span class="cls">AjouterJeuAvecNotifImpl</span>
+    <span class="kw">implements</span> <span class="cls">AjouterJeu</span> {
+    <span class="kw">public void</span> <span class="fn">executer</span>(<span class="cls">Jeu</span> jeu) {
+        <span class="cm">// + notifier les joueurs</span>
+    }
+}</pre>
+        <span class="badge badge-ok">✓ Respecté</span>
+      </div>
+    </div>
+
+    <!-- L -->
+    <div class="solid-card">
+      <div class="solid-header">
+        <div class="solid-letter" style="background:rgba(62,207,142,.15);color:#3ecf8e">L</div>
+        <div>
+          <h3>Liskov Substitution</h3>
+          <p>Les sous-types sont substituables au type parent</p>
+        </div>
+      </div>
+      <div class="solid-body">
+        <p><code>Joueur</code> étend <code>Utilisateur</code> et peut se substituer partout où un <code>Utilisateur</code> est attendu, sans altérer le comportement.</p>
+        <pre><span class="cm">// Type parent : contrat général</span>
+<span class="kw">public abstract class</span> <span class="cls">Utilisateur</span> {
+    <span class="kw">private</span> <span class="cls">String</span> pseudo;
+    <span class="kw">private</span> <span class="cls">String</span> email;
+    <span class="kw">private</span> <span class="cls">String</span> motDePasse;
+    <span class="cm">// getters / setters</span>
+}
+
+<span class="cm">// Joueur substitue Utilisateur sans briser le contrat</span>
+<span class="kw">public class</span> <span class="cls">Joueur</span> <span class="kw">extends</span> <span class="cls">Utilisateur</span> {
+    <span class="kw">private</span> <span class="cls">LocalDate</span> dateDeNaissance;
+    <span class="kw">private</span> <span class="cls">List</span>&lt;<span class="cls">Avis</span>&gt; avis;
+    <span class="cm">// Enrichit sans altérer le parent</span>
+}
+
+<span class="cm">// Utilisable partout où Utilisateur est attendu ✅</span>
+<span class="cls">Utilisateur</span> u = <span class="kw">new</span> <span class="cls">Joueur</span>();</pre>
+        <span class="badge badge-ok">✓ Respecté</span>
+      </div>
+    </div>
+
+    <!-- I -->
+    <div class="solid-card">
+      <div class="solid-header">
+        <div class="solid-letter" style="background:rgba(245,166,35,.15);color:#f5a623">I</div>
+        <div>
+          <h3>Interface Segregation</h3>
+          <p>Des interfaces spécifiques, pas une seule grosse</p>
+        </div>
+      </div>
+      <div class="solid-body">
+        <p>Chaque use case a sa propre interface. Les controllers n'injectent que ce dont ils ont besoin.</p>
+        <pre><span class="cm">// ✅ Interfaces fines et ciblées</span>
+<span class="kw">public interface</span> <span class="cls">AjouterJeu</span> {
+    <span class="kw">void</span> <span class="fn">executer</span>(<span class="cls">Jeu</span> jeu);
+}
+<span class="kw">public interface</span> <span class="cls">ListerJeux</span> {
+    <span class="cls">List</span>&lt;<span class="cls">Jeu</span>&gt; <span class="fn">executer</span>();
+}
+
+<span class="cm">// JeuController n'injecte que ce qu'il utilise</span>
+<span class="kw">public class</span> <span class="cls">JeuController</span> {
+    <span class="kw">private final</span> <span class="cls">AjouterJeu</span> ajouterJeu;
+    <span class="kw">private final</span> <span class="cls">ListerJeux</span> listerJeux;
+    <span class="cm">// Pas de dépendance sur ModererAvis !</span>
+}
+
+<span class="cm">// ❌ Ce qu'on aurait pu faire (à éviter)</span>
+<span class="cm">// public interface JeuService {</span>
+<span class="cm">//   void ajouter(); void lister(); void moderer()...</span>
+<span class="cm">// }</span></pre>
+        <span class="badge badge-ok">✓ Respecté</span>
+      </div>
+    </div>
+
+    <!-- D -->
+    <div class="solid-card" style="grid-column: 1 / -1">
+      <div class="solid-header">
+        <div class="solid-letter" style="background:rgba(150,100,220,.15);color:#b080f0">D</div>
+        <div>
+          <h3>Dependency Inversion</h3>
+          <p>Les modules de haut niveau ne dépendent pas des modules de bas niveau — tous deux dépendent d'abstractions</p>
+        </div>
+      </div>
+      <div class="solid-body">
+        <p>Le domaine définit des interfaces (ports). Les adapters les implémentent. La <code>BeanConfiguration</code> injecte les implémentations sans que le domaine connaisse Spring.</p>
+        <pre><span class="cm">// ✅ Le domaine définit l'abstraction (port)</span>
+<span class="kw">public interface</span> <span class="cls">JeuRepository</span> {           <span class="cm">// dans domain/repository</span>
+    <span class="kw">void</span> <span class="fn">sauvegarder</span>(<span class="cls">Jeu</span> jeu);
+    <span class="cls">List</span>&lt;<span class="cls">Jeu</span>&gt; <span class="fn">recupererTous</span>();
+    <span class="cls">Optional</span>&lt;<span class="cls">Jeu</span>&gt; <span class="fn">recupererParId</span>(<span class="cls">Long</span> id);
+}
+
+<span class="cm">// ✅ L'adapter (bas niveau) implémente l'interface</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cls">JeuPersistenceAdapter</span> <span class="kw">implements</span> <span class="cls">JeuRepository</span> {  <span class="cm">// dans adapter/persistence</span>
+    <span class="kw">private final</span> <span class="cls">JeuJpaRepository</span> jpaRepository;
+    <span class="kw">private final</span> <span class="cls">JeuPersistenceMapper</span> mapper;
+    <span class="cm">// implémentation Spring/JPA totalement invisible du domaine</span>
+}
+
+<span class="cm">// ✅ La BeanConfiguration injecte sans Spring dans le domaine</span>
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="cls">BeanConfiguration</span> {
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="cls">AjouterJeu</span> <span class="fn">ajouterJeu</span>(<span class="cls">JeuRepository</span> jeuRepository) {
+        <span class="kw">return new</span> <span class="cls">AjouterJeuImpl</span>(jeuRepository);  <span class="cm">// injection manuelle</span>
+    }
+}
+
+<span class="cm">// ✅ AjouterJeuImpl ne connaît que l'interface, jamais Spring ni JPA</span>
+<span class="kw">public class</span> <span class="cls">AjouterJeuImpl</span> <span class="kw">implements</span> <span class="cls">AjouterJeu</span> {
+    <span class="kw">private final</span> <span class="cls">JeuRepository</span> jeuRepository;  <span class="cm">// abstraction, pas l'implémentation</span>
+    <span class="kw">public void</span> <span class="fn">executer</span>(<span class="cls">Jeu</span> jeu) {
+        jeuRepository.<span class="fn">sauvegarder</span>(jeu);
+    }
+}</pre>
+        <span class="badge badge-ok">✓ Respecté — c'est le cœur de la Clean Architecture</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ ÉTAT-TRANSITION -->
+<section id="etat-transition">
+  <div class="section-label">03 — UML</div>
+  <h2>Diagramme État-Transition — Objet Avis</h2>
+  <p>Un avis suit un cycle de vie strict : il naît toujours en attente de modération, puis peut être validé ou rejeté. Un avis validé ne peut pas être rejeté directement (règle métier dans <code>Avis.valider()</code>).</p>
+
+  <div class="state-diagram">
+    <!-- Start -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+      <div class="state-start"></div>
+      <div class="arrow-down"><span class="arrow-label">new Avis() / setStatut(EN_ATTENTE)</span></div>
+
+      <!-- EN_ATTENTE -->
+      <div class="state-box state-wait">⏳ EN_ATTENTE</div>
+
+      <!-- Branch -->
+      <div style="display:flex;gap:6rem;margin-top:1rem;align-items:flex-start;flex-wrap:wrap;justify-content:center">
+
+        <!-- valider -->
+        <div class="branch">
+          <div class="branch-label branch-valider">validerAvis(id)</div>
+          <div style="color:var(--muted);display:flex;flex-direction:column;align-items:center">
+            <span style="font-size:1.2rem;line-height:1.2">│</span>
+            <span style="font-size:.8rem">avis.valider()</span>
+            <span>▼</span>
+          </div>
+          <div class="state-box state-valid">✅ VALIDE</div>
+          <div style="color:var(--muted);display:flex;flex-direction:column;align-items:center;margin-top:.2rem">
+            <span style="font-size:1.2rem">│</span><span>▼</span>
+          </div>
+          <div class="state-end"></div>
+        </div>
+
+        <!-- rejeter -->
+        <div class="branch">
+          <div class="branch-label branch-rejeter">rejeterAvis(id)</div>
+          <div style="color:var(--muted);display:flex;flex-direction:column;align-items:center">
+            <span style="font-size:1.2rem;line-height:1.2">│</span>
+            <span style="font-size:.8rem">avis.rejeter()</span>
+            <span>▼</span>
+          </div>
+          <div class="state-box state-reject">❌ REJETE</div>
+          <div style="color:var(--muted);display:flex;flex-direction:column;align-items:center;margin-top:.2rem">
+            <span style="font-size:1.2rem">│</span><span>▼</span>
+          </div>
+          <div class="state-end"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- code -->
+    <div style="margin-top:2rem;width:100%;max-width:600px">
+      <pre><span class="cm">// Règle métier dans Avis.java (domaine)</span>
+<span class="kw">public void</span> <span class="fn">valider</span>() {
+    <span class="cm">// Un avis déjà validé/rejeté ne peut pas être re-validé</span>
+    <span class="kw">if</span> (<span class="kw">this</span>.statut == StatutAvis.EN_ATTENTE) {
+        <span class="kw">this</span>.statut = StatutAvis.VALIDE;
+    }
+}
+
+<span class="kw">public void</span> <span class="fn">rejeter</span>() {
+    <span class="kw">this</span>.statut = StatutAvis.REJETE;
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SÉQUENCE -->
+<section id="sequence">
+  <div class="section-label">04 — UML</div>
+  <h2>Diagramme de Séquence — Use Case « Ajouter un jeu »</h2>
+  <p>Ce diagramme montre le flux complet depuis la requête HTTP jusqu'à la base de données, en traversant toutes les couches de la Clean Architecture.</p>
+
+  <div class="seq-diagram">
+    <div class="seq-svg-wrap">
+      <svg viewBox="0 0 860 520" width="860" style="max-width:100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#5b8dee"/>
+          </marker>
+          <marker id="arr-ret" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#6b7280"/>
+          </marker>
+          <marker id="arr-g" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#3ecf8e"/>
+          </marker>
+        </defs>
+
+        <!-- Actors -->
+        <g font-family="JetBrains Mono, monospace" font-size="11" fill="#e8eaf0">
+          <!-- Client -->
+          <rect x="10" y="10" width="90" height="34" rx="6" fill="#1a1e2a" stroke="#252a38"/>
+          <text x="55" y="32" text-anchor="middle" font-size="10">Client HTTP</text>
+          <!-- JeuController -->
+          <rect x="150" y="10" width="100" height="34" rx="6" fill="#1a1e2a" stroke="#252a38"/>
+          <text x="200" y="28" text-anchor="middle" font-size="10">JeuController</text>
+          <text x="200" y="40" text-anchor="middle" font-size="8" fill="#6b7280">adapter/web</text>
+          <!-- AjouterJeu -->
+          <rect x="310" y="10" width="100" height="34" rx="6" fill="#1a1e2a" stroke="#252a38"/>
+          <text x="360" y="28" text-anchor="middle" font-size="10">AjouterJeu</text>
+          <text x="360" y="40" text-anchor="middle" font-size="8" fill="#6b7280">domain/usecase</text>
+          <!-- JeuRepository -->
+          <rect x="470" y="10" width="110" height="34" rx="6" fill="#1a1e2a" stroke="#252a38"/>
+          <text x="525" y="28" text-anchor="middle" font-size="10">JeuRepository</text>
+          <text x="525" y="40" text-anchor="middle" font-size="8" fill="#6b7280">port (interface)</text>
+          <!-- JeuPersistenceAdapter -->
+          <rect x="640" y="10" width="110" height="34" rx="6" fill="#1a1e2a" stroke="#252a38"/>
+          <text x="695" y="24" text-anchor="middle" font-size="10">Persistence</text>
+          <text x="695" y="36" text-anchor="middle" font-size="10">Adapter</text>
+          <text x="695" y="47" text-anchor="middle" font-size="8" fill="#6b7280">adapter/persist.</text>
+          <!-- JpaRepository -->
+          <rect x="800" y="10" width="50" height="34" rx="6" fill="#1a1e2a" stroke="#252a38"/>
+          <text x="825" y="28" text-anchor="middle" font-size="10">JPA</text>
+          <text x="825" y="40" text-anchor="middle" font-size="8" fill="#6b7280">H2 DB</text>
+        </g>
+
+        <!-- Lifelines -->
+        <line x1="55" y1="44" x2="55" y2="510" stroke="#252a38" stroke-dasharray="4,4"/>
+        <line x1="200" y1="44" x2="200" y2="510" stroke="#252a38" stroke-dasharray="4,4"/>
+        <line x1="360" y1="44" x2="360" y2="510" stroke="#252a38" stroke-dasharray="4,4"/>
+        <line x1="525" y1="44" x2="525" y2="510" stroke="#252a38" stroke-dasharray="4,4"/>
+        <line x1="695" y1="54" x2="695" y2="510" stroke="#252a38" stroke-dasharray="4,4"/>
+        <line x1="825" y1="44" x2="825" y2="510" stroke="#252a38" stroke-dasharray="4,4"/>
+
+        <!-- Messages -->
+        <!-- 1. POST /api/jeux -->
+        <line x1="55" y1="90" x2="192" y2="90" stroke="#5b8dee" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="120" y="84" text-anchor="middle" font-size="10" fill="#e8eaf0" font-family="JetBrains Mono, monospace">POST /api/jeux {nom, prix...}</text>
+
+        <!-- activation JeuController -->
+        <rect x="196" y="90" width="8" height="300" rx="2" fill="#5b8dee" opacity=".3"/>
+
+        <!-- 2. new Jeu() + setters -->
+        <line x1="200" y1="125" x2="352" y2="125" stroke="#5b8dee" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="278" y="118" text-anchor="middle" font-size="10" fill="#e8eaf0" font-family="JetBrains Mono, monospace">ajouterJeu.executer(jeu)</text>
+
+        <!-- activation AjouterJeuImpl -->
+        <rect x="356" y="125" width="8" height="220" rx="2" fill="#f5a623" opacity=".3"/>
+
+        <!-- 3. sauvegarder via port -->
+        <line x1="360" y1="165" x2="517" y2="165" stroke="#5b8dee" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="440" y="158" text-anchor="middle" font-size="10" fill="#e8eaf0" font-family="JetBrains Mono, monospace">sauvegarder(jeu)</text>
+        <text x="440" y="173" text-anchor="middle" font-size="8" fill="#6b7280" font-family="JetBrains Mono, monospace">interface → implémentation</text>
+
+        <!-- activation PersistenceAdapter -->
+        <rect x="691" y="185" width="8" height="130" rx="2" fill="#3ecf8e" opacity=".3"/>
+
+        <!-- 4. mapper.toEntity -->
+        <line x1="525" y1="200" x2="687" y2="200" stroke="#5b8dee" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="603" y="193" text-anchor="middle" font-size="10" fill="#e8eaf0" font-family="JetBrains Mono, monospace">mapper.toEntity(jeu)</text>
+
+        <!-- 5. jpaRepository.save -->
+        <line x1="695" y1="235" x2="817" y2="235" stroke="#5b8dee" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="753" y="228" text-anchor="middle" font-size="10" fill="#e8eaf0" font-family="JetBrains Mono, monospace">save(jeuEntity)</text>
+
+        <!-- activation JPA -->
+        <rect x="821" y="235" width="8" height="50" rx="2" fill="#9080e0" opacity=".3"/>
+
+        <!-- 6. return saved entity -->
+        <line x1="821" y1="285" x2="699" y2="285" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-ret)"/>
+        <text x="757" y="278" text-anchor="middle" font-size="10" fill="#6b7280" font-family="JetBrains Mono, monospace">JeuEntity sauvegardée</text>
+
+        <!-- 7. return void to usecase -->
+        <line x1="691" y1="315" x2="364" y2="315" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-ret)"/>
+        <text x="527" y="308" text-anchor="middle" font-size="10" fill="#6b7280" font-family="JetBrains Mono, monospace">void</text>
+
+        <!-- 8. return void to controller -->
+        <line x1="356" y1="345" x2="204" y2="345" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-ret)"/>
+        <text x="278" y="338" text-anchor="middle" font-size="10" fill="#6b7280" font-family="JetBrains Mono, monospace">void</text>
+
+        <!-- 9. HTTP 200 OK -->
+        <line x1="196" y1="390" x2="63" y2="390" stroke="#3ecf8e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+        <text x="120" y="383" text-anchor="middle" font-size="10" fill="#3ecf8e" font-family="JetBrains Mono, monospace">HTTP 200 OK</text>
+
+        <!-- Layer labels -->
+        <rect x="10" y="455" width="90" height="22" rx="4" fill="rgba(70,90,160,.15)" stroke="rgba(70,90,160,.3)"/>
+        <text x="55" y="469" text-anchor="middle" font-size="9" fill="#8aabf0" font-family="JetBrains Mono, monospace">Frameworks</text>
+
+        <rect x="150" y="455" width="100" height="22" rx="4" fill="rgba(60,120,70,.15)" stroke="rgba(60,120,70,.3)"/>
+        <text x="200" y="469" text-anchor="middle" font-size="9" fill="#80d0a0" font-family="JetBrains Mono, monospace">Adapters</text>
+
+        <rect x="310" y="455" width="265" height="22" rx="4" fill="rgba(90,70,180,.15)" stroke="rgba(90,70,180,.3)"/>
+        <text x="442" y="469" text-anchor="middle" font-size="9" fill="#b0a0f0" font-family="JetBrains Mono, monospace">Domaine (Use Cases + Ports)</text>
+
+        <rect x="640" y="455" width="220" height="22" rx="4" fill="rgba(60,120,70,.15)" stroke="rgba(60,120,70,.3)"/>
+        <text x="750" y="469" text-anchor="middle" font-size="9" fill="#80d0a0" font-family="JetBrains Mono, monospace">Adapters + Infrastructure</text>
+      </svg>
+    </div>
+
+    <div style="margin-top:1.5rem">
+      <pre><span class="cm">// Flux complet dans JeuController.java</span>
+<span class="an">@PostMapping</span>
+<span class="kw">public void</span> <span class="fn">creerJeu</span>(<span class="an">@RequestBody</span> <span class="cls">JeuRequest</span> request) {
+    <span class="cls">Jeu</span> nouveauJeu = <span class="kw">new</span> <span class="cls">Jeu</span>();
+    nouveauJeu.<span class="fn">setNom</span>(request.<span class="fn">getNom</span>());
+    nouveauJeu.<span class="fn">setDescription</span>(request.<span class="fn">getDescription</span>());
+    nouveauJeu.<span class="fn">setPrix</span>(request.<span class="fn">getPrix</span>());
+    ajouterJeu.<span class="fn">executer</span>(nouveauJeu);  <span class="cm">// → AjouterJeuImpl → JeuPersistenceAdapter → H2</span>
+}</pre>
+    </div>
+  </div>
+</section>
+
+<footer style="text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border)">
+  Projet Avis sur les jeux vidéo — M2 Software Architecture — Clean Architecture avec Spring Boot
+</footer>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('section');
+  const links = document.querySelectorAll('nav a');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const lnk = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (lnk) lnk.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
