@@ -1,8 +1,11 @@
 package fr.esgi.avis.adapter.persistence;
 
 import fr.esgi.avis.domain.model.Avis;
+import fr.esgi.avis.domain.model.Jeu;
+import fr.esgi.avis.domain.model.Joueur;
 import fr.esgi.avis.domain.repository.AvisRepository;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,32 +13,69 @@ import java.util.stream.Collectors;
 @Component
 public class AvisPersistenceAdapter implements AvisRepository {
 
-    private final AvisJpaRepository jpaRepository;
-    private final AvisPersistenceMapper mapper; // Ajout du mapper
+    private final AvisJpaRepository avisJpaRepository;
+    private final AvisPersistenceMapper mapper;
+    private final JeuJpaRepository jeuJpaRepository;
+    private final JeuPersistenceMapper jeuMapper;
+    private final JoueurJpaRepository joueurJpaRepository;
+    private final JoueurPersistenceMapper joueurMapper;
 
-    public AvisPersistenceAdapter(AvisJpaRepository jpaRepository, AvisPersistenceMapper mapper) {
-        this.jpaRepository = jpaRepository;
+    public AvisPersistenceAdapter(AvisJpaRepository avisJpaRepository,
+                                  AvisPersistenceMapper mapper,
+                                  JeuJpaRepository jeuJpaRepository,
+                                  JeuPersistenceMapper jeuMapper,
+                                  JoueurJpaRepository joueurJpaRepository,
+                                  JoueurPersistenceMapper joueurMapper) {
+        this.avisJpaRepository = avisJpaRepository;
         this.mapper = mapper;
+        this.jeuJpaRepository = jeuJpaRepository;
+        this.jeuMapper = jeuMapper;
+        this.joueurJpaRepository = joueurJpaRepository;
+        this.joueurMapper = joueurMapper;
     }
 
     @Override
     public void sauvegarder(Avis avis) {
-        // On utilise le mapper pour transformer le domaine en entité avant de sauvegarder
         AvisEntity entity = mapper.toEntity(avis);
-        jpaRepository.save(entity);
+        avisJpaRepository.save(entity);
     }
 
     @Override
     public Optional<Avis> recupererParId(Long id) {
-        // On récupère l'entité et on utilise le mapper pour revenir vers le domaine
-        return jpaRepository.findById(id).map(mapper::toDomain);
+        return avisJpaRepository.findById(id)
+                .map(this::enrichir);
     }
 
     @Override
     public List<Avis> recupererTous() {
-        // On transforme toute la liste via le mapper
-        return jpaRepository.findAll().stream()
-                .map(mapper::toDomain)
+        return avisJpaRepository.findAll().stream()
+                .map(this::enrichir)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Convertit une AvisEntity en Avis domaine,
+     * en allant chercher le Jeu et le Joueur complets en base.
+     */
+    private Avis enrichir(AvisEntity entity) {
+        Avis avis = mapper.toDomain(entity);
+
+        // Charger le Jeu complet si l'ID est présent
+        if (entity.getJeuId() != null) {
+            Jeu jeu = jeuJpaRepository.findById(entity.getJeuId())
+                    .map(jeuMapper::toDomain)
+                    .orElse(avis.getJeu()); // fallback sur l'objet minimaliste
+            avis.setJeu(jeu);
+        }
+
+        // Charger le Joueur complet si l'ID est présent
+        if (entity.getJoueurId() != null) {
+            Joueur joueur = joueurJpaRepository.findById(entity.getJoueurId())
+                    .map(joueurMapper::toDomain)
+                    .orElse(avis.getJoueur()); // fallback sur l'objet minimaliste
+            avis.setJoueur(joueur);
+        }
+
+        return avis;
     }
 }
